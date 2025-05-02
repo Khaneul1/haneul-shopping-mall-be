@@ -2,12 +2,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const indexRouter = require('./routes/index');
 const app = express();
 
 require('dotenv').config();
 app.use(cors()); //cors를 사용하는 거니까 app.use 사용해야 함
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json()); //req.body가 객체로 인식됨
+
+app.use('/api', indexRouter); //라우터 세팅
+// /api/user -> indexRouter -> index.js -> user.api.js -> 포스트 메서드 들어오면 userController
 
 // 데이터베이스 세팅
 const mongoURI = process.env.LOCAL_DB_ADDRESS;
