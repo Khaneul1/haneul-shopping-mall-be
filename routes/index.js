@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userApi = require('./user.api');
+const authApi = require('./auth.api');
 
 // 뭘 세팅할까용? 순서부터 정하면 좋음
 // 1. User 세팅
@@ -9,5 +10,7 @@ const userApi = require('./user.api');
 
 // 테이블 생성하는 유저 회원가입 기능
 router.use('/user', userApi);
+
+router.use('/auth', authApi);
 
 module.exports = router; //이거는 app.js에서 받아서 씀
