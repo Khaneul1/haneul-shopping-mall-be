@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = require('./User');
 const Product = require('./Product');
 const Schema = mongoose.Schema;
-const orderSchema = Schema(
+const orderItemSchema = Schema(
   {
     userId: { type: mongoose.ObjectId, ref: User, required: true },
     shipTo: { type: String, required: true }, //배송지
@@ -33,5 +33,5 @@ productSchema.methods.toJSON = function () {
   return obj;
 };
 
-const Order = mongoose.model('ORder', orderSchema);
+const Order = mongoose.model('ORder', orderItemSchema);
 module.exports = Order;
