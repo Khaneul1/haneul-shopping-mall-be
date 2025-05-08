@@ -38,4 +38,19 @@ authController.authenticate = async (req, res, next) => {
   }
 };
 
+// authenticate에서 받은 userId를 가지고 확인하면 됨!!
+// 굳이 또 써 줄 필요 X
+// 그래서 ~~ product.api에 authenticate > checkAdminPermission > productController.createProduct
+// 위의 순으로 진행되도록 코드 설정
+authController.checkAdminPermission = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const user = await User.findById(userId);
+    if (user.level !== 'admin') throw new Error('no permission');
+    next();
+  } catch (error) {
+    res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
 module.exports = authController;
