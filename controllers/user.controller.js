@@ -27,6 +27,7 @@ userController.createUser = async (req, res) => {
       level: level ? level : 'customer',
     });
     await newUser.save();
+    console.log('create new user success', newUser);
     return res.status(200).json({ status: 'success' });
 
     //   유저 정보 저장하기 전 패스워드 암호화!!
@@ -39,6 +40,7 @@ userController.getUser = async (req, res) => {
   try {
     const { userId } = req;
     const user = await User.findById(userId);
+    console.log('get user success');
     if (user) {
       res.status(200).json({ status: 'success', user }); //user: user
     }
