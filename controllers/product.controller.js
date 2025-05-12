@@ -1,5 +1,7 @@
 const productController = {};
 const Product = require('../models/Product');
+const PAGE_SIZE = 1;
+
 // product 모델 참고해서 작성하면 됨
 productController.createProduct = async (req, res) => {
   try {
@@ -54,11 +56,36 @@ productController.getProducts = async (req, res) => {
     //name에 값이 있다면 포함된 것까지 대소문자 구별 없이 찾고, name 값이 없으면 비어있는 걸 넣어주겠다
     const cond = name ? { name: { $regex: name, $options: 'i' } } : {};
     let query = Product.find(cond);
+    let response = { status: 'success' };
+
+    //만약 page 값이 존재한다면
+    if (page) {
+      //skip()과 limig()
+      //mongoose의 함수로! 파라미터로 숫자를 받아감
+      //내가 skip 하고 싶은 데이터를 스킵할 수 있게 해 줌
+      //10개의 데이터 중에서, 한 페이지당 5개의 데이터만 보여 주고 싶다면 limit(5) 사용
+      //최대 몇 개까지만 보낼 건지에 대해 사용하는 게 limit()
+
+      //두 번째 페이지에서는 나머지 5개의 데이터를 보여 줘야 함!
+      //이럴 경우 첫 번째 페이지의 5개 데이터를 skip() 해 줘야 함
+      //15개의 데이터라면, 3페이지에 갔을 때 10개의 데이터를 스킵해 줘야 하는 것!
+
+      //page - 1 : 인덱스 값처럼! 그다음 내 페이지 사이즈만큼 곱해 주기
+      query.skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE);
+      //15개의 데이터 중에서, 3페이지를 눌렀을 경우 3-1=2, 2*5 =10 (그럼 총 10개의 데이터 건너뛰고)
+      //limit(5)로 나머지 5개의 데이터만 보여 주겠다는 의미~!!!
+
+      //전체 페이지 개수 = 전체 데이터 개수 / 페이지 사이즈
+      const totalItemNumber = await Product.find(cond).count(); //데이터 총 몇 개 있는지 확인하고
+      const totalPageNum = Math.ceil(totalItemNumber / PAGE_SIZE);
+      response.totalPageNum = totalPageNum;
+    }
 
     const productList = await query.exec(); //위에 만들어 뒀던 쿼리 여기서 실행시키겠다
     //선언과 실행 따로 하는 방법 ^
+    response.data = productList;
 
-    res.status(200).json({ status: 'success', data: productList });
+    res.status(200).json(response); //상황에 따라 어떤 resp가 전달될지 결정됨
   } catch (error) {
     res.status(400).json({ status: 'fail', error: error.message });
   }
