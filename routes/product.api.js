@@ -11,4 +11,6 @@ router.post(
   productController.createProduct
 );
 
+router.get('/', productController.getProducts); //product 읽어오는 건 admin 필요 없자나
+
 module.exports = router;
