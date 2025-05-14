@@ -12,5 +12,18 @@ router.post(
 );
 
 router.get('/', productController.getProducts); //product 읽어오는 건 admin 필요 없자나
+router.put(
+  '/:id',
+  authController.authenticate,
+  authController.checkAdminPermission,
+  productController.updateProduct
+); //상품 수정 (상품의 id값 받아와서 수정) :: admin permission 체크해 줘야지 ~!!!
+
+router.delete(
+  '/:id/delete',
+  authController.authenticate,
+  authController.checkAdminPermission,
+  productController.deleteProduct
+);
 
 module.exports = router;

@@ -76,7 +76,7 @@ productController.getProducts = async (req, res) => {
       //limit(5)로 나머지 5개의 데이터만 보여 주겠다는 의미~!!!
 
       //전체 페이지 개수 = 전체 데이터 개수 / 페이지 사이즈
-      const totalItemNumber = await Product.find(cond).count(); //데이터 총 몇 개 있는지 확인하고
+      const totalItemNumber = await Product.countDocuments(cond); //데이터 총 몇 개 있는지 확인하고
       const totalPageNum = Math.ceil(totalItemNumber / PAGE_SIZE);
       response.totalPageNum = totalPageNum;
     }
@@ -86,6 +86,56 @@ productController.getProducts = async (req, res) => {
     response.data = productList;
 
     res.status(200).json(response); //상황에 따라 어떤 resp가 전달될지 결정됨
+  } catch (error) {
+    res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
+productController.updateProduct = async (req, res) => {
+  try {
+    const productId = req.params.id; //id라는 값을 통해서 productId를 읽어옴 (수정하고 싶은 상품)
+    const {
+      sku,
+      name,
+      size,
+      image,
+      price,
+      description,
+      category,
+      stock,
+      status,
+    } = req.body; //어떤 데이터를 수정하고자 하는지 모르기 때문에 전체를 불러옴
+
+    const product = await Product.findByIdAndUpdate(
+      { _id: productId },
+      { sku, name, size, image, price, description, category, stock, status },
+      { new: true } //update 함수들에 옵션으로 줄 수 있는 값 중 하나
+      //new : true를 넣어주면 업데이트한 후 새로운 값을 반환받을 수 있음!!
+    ); //상품 업데이트 : productId를 바뀐 값으로 업데이트하기
+
+    if (!product) throw new Error('상품이 존재하지 않습니다.');
+    res.status(200).json({ status: 'success', data: product });
+  } catch (error) {
+    console.log('상품 수정 실패...');
+    res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
+productController.deleteProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res
+        .status(400)
+        .json({ status: 'fail', message: '상품을 찾을 수 없습니다.' });
+    }
+
+    await Product.findByIdAndDelete(productId);
+    res
+      .status(200)
+      .json({ status: 'success', message: '상품이 삭제되었습니다.' });
   } catch (error) {
     res.status(400).json({ status: 'fail', error: error.message });
   }
