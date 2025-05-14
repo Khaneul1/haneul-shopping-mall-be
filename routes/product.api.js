@@ -20,7 +20,7 @@ router.put(
 ); //상품 수정 (상품의 id값 받아와서 수정) :: admin permission 체크해 줘야지 ~!!!
 
 router.delete(
-  '/:id/delete',
+  '/:id',
   authController.authenticate,
   authController.checkAdminPermission,
   productController.deleteProduct
