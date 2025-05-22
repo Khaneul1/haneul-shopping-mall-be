@@ -1,6 +1,6 @@
-const productController = {};
 const Product = require('../models/Product');
 const PAGE_SIZE = 1;
+const productController = {};
 
 // product 모델 참고해서 작성하면 됨
 productController.createProduct = async (req, res) => {
@@ -88,6 +88,16 @@ productController.getProducts = async (req, res) => {
     res.status(200).json(response); //상황에 따라 어떤 resp가 전달될지 결정됨
   } catch (error) {
     res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
+productController.getProductDetail = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    res.status(200).json({ status: 'success', data: product });
+  } catch (error) {
+    res.status(400).json({ status: 'error', error: error.error });
   }
 };
 

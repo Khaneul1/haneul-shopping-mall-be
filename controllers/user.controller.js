@@ -42,7 +42,7 @@ userController.getUser = async (req, res) => {
     const user = await User.findById(userId);
     console.log('get user success');
     if (user) {
-      res.status(200).json({ status: 'success', user }); //user: user
+      return res.status(200).json({ status: 'success', user }); //user: user
     }
     throw new Error('invalid token');
   } catch (error) {
