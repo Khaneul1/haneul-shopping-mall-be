@@ -12,6 +12,8 @@ router.post(
 );
 
 router.get('/', productController.getProducts); //product 읽어오는 건 admin 필요 없자나
+router.get('/:id', productController.getProductDetail);
+
 router.put(
   '/:id',
   authController.authenticate,
