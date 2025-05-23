@@ -4,6 +4,7 @@ const userApi = require('./user.api');
 const authApi = require('./auth.api');
 const productApi = require('./product.api');
 const cartApi = require('./cart.api');
+const orderApi = require('./order.api');
 
 // 뭘 세팅할까용? 순서부터 정하면 좋음
 // 1. User 세팅
@@ -16,5 +17,7 @@ router.use('/user', userApi);
 router.use('/auth', authApi);
 router.use('/product', productApi);
 router.use('/cart', cartApi);
+
+router.use('/order', orderApi);
 
 module.exports = router; //이거는 app.js에서 받아서 씀

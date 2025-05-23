@@ -14,7 +14,7 @@ const orderItemSchema = Schema(
     item: [
       {
         //   어떤 아이템 선택했는지
-        productId: { type: mongoose.ObjectId, ref: Product, required: trfue },
+        productId: { type: mongoose.ObjectId, ref: Product }, //required 들어가야 한다고 생각했는데 강의에 없음
         //   어떤 사이즈
         size: { type: String, required: true },
         // 몇 개 구매
