@@ -11,4 +11,7 @@ router.post('/', authController.authenticate, cartController.addItemToCart);
 //userId 찾아낸 다음.. 카트로 넘어가는 것
 router.get('/', authController.authenticate, cartController.getCart);
 
+//cart item 삭제
+router.get('/:id', authController.authenticate, cartController.deleteCart);
+
 module.exports = router;

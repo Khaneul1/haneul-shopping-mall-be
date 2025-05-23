@@ -62,4 +62,34 @@ cartController.getCart = async (req, res) => {
   }
 };
 
+cartController.deleteCart = async (req, res) => {
+  try {
+    const { userId } = req;
+    // const { productId } = req.body; -> 이게 아니었다...
+    //기찬 오빠 코드..... 참고...하기...
+    const cartItemId = req.params.id;
+
+    //유저 id로 카트 찾기
+    const cart = await Cart.findOne({ userId });
+
+    //productId가 일치하는 아이템을 제외한 나머지만 남기기
+    // const filteredItems = cart.items.filter(
+    //   (item) => !item.productId.equals(productId)
+    // );
+    //이 또한 기찬 오빠 코드 참고하여
+    const deleteItem = cart.items.find((item) => item._id == cartItemId);
+    if (!deleteItem) throw new Error('상품이 존재하지 않습니다');
+    await cart.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: '아이템이 카트에서 삭제되었습니다.',
+      data: cart,
+      cartItemCount: cart.items.length,
+    });
+  } catch (error) {
+    res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
 module.exports = cartController;
