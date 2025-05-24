@@ -12,6 +12,6 @@ router.post('/', authController.authenticate, cartController.addItemToCart);
 router.get('/', authController.authenticate, cartController.getCart);
 
 //cart item 삭제
-router.get('/:id', authController.authenticate, cartController.deleteCart);
+router.delete('/:id', authController.authenticate, cartController.deleteCart);
 
 module.exports = router;

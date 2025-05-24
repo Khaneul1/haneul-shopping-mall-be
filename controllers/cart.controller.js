@@ -76,9 +76,15 @@ cartController.deleteCart = async (req, res) => {
     // const filteredItems = cart.items.filter(
     //   (item) => !item.productId.equals(productId)
     // );
+    // cart.items = filteredItems
+
     //이 또한 기찬 오빠 코드 참고하여
+    //위에서 사용한 Cart.findOne 이거는 모델에서 찾는 것이라서 몽구스 함수고
+    //아래의 .find는 배열(cart.items)에서 찾는 거라서 몽구스 함수 아님 (배열 함수!!!)
     const deleteItem = cart.items.find((item) => item._id == cartItemId);
     if (!deleteItem) throw new Error('상품이 존재하지 않습니다');
+    cart.items = cart.items.filter((item) => item._id != cartItemId);
+    console.log(cart.items);
     await cart.save();
 
     res.status(200).json({
