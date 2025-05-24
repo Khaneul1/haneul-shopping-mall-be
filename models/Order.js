@@ -2,11 +2,12 @@
 const mongoose = require('mongoose');
 const User = require('./User');
 const Product = require('./Product');
+const Cart = require('./Cart');
 const Schema = mongoose.Schema;
 const orderItemSchema = Schema(
   {
     userId: { type: mongoose.ObjectId, ref: User, required: true },
-    shipTo: { type: String, required: true }, //배송지
+    shipTo: { type: Object, required: true }, //배송지
     contact: { type: Object, required: true }, //type이 string일 줄 알았다
     status: { type: String, default: 'preparing' }, //fin으로 설정했는데 좀 더 직관적인 preparing이 정답이었다
     totalPrice: { type: Number, required: true, default: 0 }, //default값 설정을 해야 한다고 생각 못했음
@@ -33,5 +34,12 @@ orderItemSchema.methods.toJSON = function () {
   return obj;
 };
 
-const Order = mongoose.model('ORder', orderItemSchema);
+orderItemSchema.post('save', async function () {
+  //카트 비우기
+  const cart = await Cart.findOne({ userId: this.userId });
+  cart.items = [];
+  await cart.save();
+});
+
+const Order = mongoose.model('Order', orderItemSchema);
 module.exports = Order;

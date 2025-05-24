@@ -1,6 +1,7 @@
 const orderController = {};
 
 const Order = require('../models/Order');
+const { randomStringGenerator } = require('../utils/randomStringGenerator');
 const productController = require('./product.controller');
 
 orderController.createOrder = async (req, res) => {
@@ -39,6 +40,7 @@ orderController.createOrder = async (req, res) => {
     });
 
     await newOrder.save();
+    //save 후에 카트 비워주기! -> Order.js에서 코드 추가
     res.status(200).json({ status: 'success', orderNum: newOrder.orderNum });
   } catch (error) {
     return res.status(400).json({ status: 'fail', error: error.message });

@@ -174,14 +174,14 @@ productController.checkStock = async (item) => {
   return { isVerify: true };
 };
 
-productController.checkItemListStock = async (req, res) => {
+productController.checkItemListStock = async (itemList) => {
   const insufficientStockItems = []; //불충분한 아이템 리스트 반환
   //재고 확인 로직
   //비동기 한 번에 처리하는 것 -> promise.all
   await Promise.all(
     itemList.map(async (item) => {
       const stockCheck = await productController.checkStock(item); //아이템 하나하나에 대해서 포커스
-      if (stockCheck.isVerify) {
+      if (!stockCheck.isVerify) {
         //stockCheck의 isVerify가 false라면 불충분 재고를 넣어 줌
         insufficientStockItems.push({ item, message: stockCheck.message });
       }

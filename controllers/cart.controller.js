@@ -1,4 +1,5 @@
 // const { populate } = require('dotenv'); -> 오류 원인
+const { populate } = require('dotenv');
 const Cart = require('../models/Cart');
 
 const cartController = {};
@@ -95,6 +96,68 @@ cartController.deleteCart = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
+cartController.updateQty = async (req, res) => {
+  try {
+    const { userId } = req;
+    const cartItemId = req.params.id; //id라는 값을 통해서 productId를 읽어옴 (수정하고 싶은 상품)
+    const { qty } = req.body;
+
+    const cart = await Cart.findOne({ userId }).populate({
+      path: 'items',
+      populate: {
+        path: 'productId',
+        model: 'Product',
+      },
+    });
+
+    if (!cart) throw new Error('카트가 존재하지 않습니다');
+    const updateItem = cart.items.find((item) => item._id == cartItemId);
+    if (!updateItem) throw new Error('상품이 존재하지 않습니다');
+
+    //map 까먹어서 적어 놓는 것
+    //map() : 배열의 각 요소를 순회하여 콜백 함수를 적용한 결과를 모아 새로운 배열을 반환
+    //원본 배열 변경 X -> 배열의 각 요소를 변환하거나 가공한 결과를 적용한 새로운 요소로 배열 생성 위함
+    //qty를 사용자가 변경할 경우 해당 요소 변환하여 새로운 요소를 반환해야 하기 때문에 map 사용
+    //물론~~ 기찬 오빠 코드 지분 99% ^_^
+
+    //arr.map(function(element, index, array){  }, this);
+    //콜백함수(function) : 각 배열 요소에 호출
+    //map() : 현재의 elment와 index, 그리고 전체 array 깨체를 해당 요소에 전달
+    //this 인수 : 콜백함수 내부에서 사용됨
+
+    cart.items = cart.items.map((item) => {
+      if (item._id == cartItemId) item.qty = qty;
+      return item;
+    });
+    await cart.save();
+    console.log('cart qty edit', cart, cart.items.length);
+    res.status(200).json({ status: 'success', data: cart.items });
+  } catch (error) {
+    return res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
+cartController.getCartQty = async (req, res) => {
+  try {
+    const { userId } = req;
+    // const cartItemId = req.params.id;
+    // const { qty } = req.body; -> 불러올 필요가 없었나 봐요 기찬 오빠 감삼다..
+    const cart = await Cart.findOne({ userId });
+    if (!cart) throw new Error('카트가 존재하지 않습니다.');
+
+    // cartItemCount: cart.items.length 뭔가 이게 들어가야 할 것 같은데
+    // 어케 코드를 구성해야 될지 모르겠음
+    // 해결법 : 기찬 오빠 코드 보기
+    const cartItemCount = cart.items.length;
+
+    if (cartItemCount < 0) cartItemCount = 0; //아마도 cartItem 수가 0보다 작으면 쇼핑백 숫자 0으로 설정한다?는 뜻?인가요?
+    // await cart.save();
+    res.status(200).json({ status: 'success', cartItemCount });
+  } catch (error) {
+    return res.status(400).json({ status: 'fail', error: error.message });
   }
 };
 
