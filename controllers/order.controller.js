@@ -4,6 +4,7 @@ const { populate } = require('dotenv');
 const Order = require('../models/Order');
 const { randomStringGenerator } = require('../utils/randomStringGenerator');
 const productController = require('./product.controller');
+const { model } = require('mongoose');
 
 orderController.createOrder = async (req, res) => {
   try {
@@ -70,6 +71,47 @@ orderController.getOrder = async (req, res, next) => {
     const totalItemNum = await Order.find({ userId: userId }).count();
 
     const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+    res.status(200).json({ status: 'success', data: orderList, totalPageNum });
+  } catch (error) {
+    return res.status(400).json({ status: 'fail', error: error.message });
+  }
+};
+
+//코알누 정답 코드 및 태양이 코드 참고했습니다......
+orderController.getOrderList = async (req, res, next) => {
+  try {
+    const { page, ordernum } = req.query;
+    const { userId } = req;
+
+    //cond == 조건 객체!! (mongoDB에서 사용할 검색 조건 의미)
+    //ordernum이 있을 경우 $regex(부분 일치 검색)으로 판단함!!
+    //userId를 항상 포함시켜 본인 주문만 필터링하도록 설정
+    const cond = ordernum
+      ? { ordernum: { $regex: ordernum, $options: 'i' }, userId }
+      : { userId };
+
+    //populate로 각 주문의 items.poductId를 실제 Product 모델로 교체
+    //order.items[n].productId -> 실제 Product models
+
+    //페이징 처리 : page를 기준으로 skip() + limit() 사용
+    //(1) 전체 데이터를 한 번에 보내면 속도 느려지고 서버 과부하!!
+    // 따라서 한 페이지당 일부 데이터만 부분적으로 조회할 수 있어야 함
+    //(2) 사용자에게 페이지 단위로 보여 주기 위해
+    let orderList = await Order.find(cond)
+      .populate({
+        path: 'items',
+        populate: {
+          path: 'productId',
+          model: 'Product',
+        },
+      })
+      .skip((page - 1) * PAGE_SIZE)
+      .limit(PAGE_SIZE);
+
+    //조건에 맞는 전체 주문 수를 세서 총 페이지 수를 계산!!
+    const totalItemNum = await Order.countDocuments(cond);
+    const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+
     res.status(200).json({ status: 'success', data: orderList, totalPageNum });
   } catch (error) {
     return res.status(400).json({ status: 'fail', error: error.message });
