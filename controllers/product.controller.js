@@ -1,5 +1,5 @@
 const Product = require('../models/Product');
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 10;
 const productController = {};
 
 // product 모델 참고해서 작성하면 됨
@@ -54,7 +54,10 @@ productController.getProducts = async (req, res) => {
   try {
     const { page, name } = req.query;
     //name에 값이 있다면 포함된 것까지 대소문자 구별 없이 찾고, name 값이 없으면 비어있는 걸 넣어주겠다
-    const cond = name ? { name: { $regex: name, $options: 'i' } } : {};
+    const cond = {
+      isDeleted: false,
+      ...(name ? { name: { $regex: name, $options: 'i' } } : {}),
+    };
     let query = Product.find(cond);
     let response = { status: 'success' };
 
@@ -94,7 +97,12 @@ productController.getProducts = async (req, res) => {
 productController.getProductDetail = async (req, res) => {
   try {
     const productId = req.params.id;
-    const product = await Product.findById(productId);
+    const product = await Product.findOne({ _id: productId, isDeleted: false });
+    if (!product) {
+      return res
+        .status(400)
+        .json({ status: 'success', message: '상품을 찾을 수 없습니다.' });
+    }
     res.status(200).json({ status: 'success', data: product });
   } catch (error) {
     res.status(400).json({ status: 'error', error: error.error });
@@ -117,7 +125,7 @@ productController.updateProduct = async (req, res) => {
     } = req.body; //어떤 데이터를 수정하고자 하는지 모르기 때문에 전체를 불러옴
 
     const product = await Product.findByIdAndUpdate(
-      { _id: productId },
+      { _id: productId, isDeleted: false },
       { sku, name, size, image, price, description, category, stock, status },
       { new: true } //update 함수들에 옵션으로 줄 수 있는 값 중 하나
       //new : true를 넣어주면 업데이트한 후 새로운 값을 반환받을 수 있음!!
@@ -136,13 +144,15 @@ productController.deleteProduct = async (req, res) => {
     const productId = req.params.id;
 
     const product = await Product.findById(productId);
-    if (!product) {
+    if (!product || product.isDeleted) {
       return res
         .status(400)
         .json({ status: 'fail', message: '상품을 찾을 수 없습니다.' });
     }
 
-    await Product.findByIdAndDelete(productId);
+    // await Product.findByIdAndDelete(productId);
+    product.isDeleted = true;
+    await product.save();
     res
       .status(200)
       .json({ status: 'success', message: '상품이 삭제되었습니다.' });
