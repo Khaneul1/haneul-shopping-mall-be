@@ -13,7 +13,7 @@ const productSchema = Schema(
     status: { type: String, default: 'active' }, //디스플레이 될 만한 상품인지 아닌지 (기본 값은 활성화)
     isDeleted: { type: Boolean, default: false }, //삭제됐는지 안 됐는지 표시만 하는 것
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 productSchema.methods.toJSON = function () {
   const obj = this._doc;

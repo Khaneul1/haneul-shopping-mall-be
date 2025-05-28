@@ -97,7 +97,7 @@ productController.getProducts = async (req, res) => {
 productController.getProductDetail = async (req, res) => {
   try {
     const productId = req.params.id;
-    const product = await Product.findOne({ _id: productId, isDeleted: false });
+    const product = await Product.findOne({ _id: productId });
     if (!product) {
       return res
         .status(400)
@@ -125,7 +125,7 @@ productController.updateProduct = async (req, res) => {
     } = req.body; //어떤 데이터를 수정하고자 하는지 모르기 때문에 전체를 불러옴
 
     const product = await Product.findByIdAndUpdate(
-      { _id: productId, isDeleted: false },
+      { _id: productId },
       { sku, name, size, image, price, description, category, stock, status },
       { new: true } //update 함수들에 옵션으로 줄 수 있는 값 중 하나
       //new : true를 넣어주면 업데이트한 후 새로운 값을 반환받을 수 있음!!
@@ -144,14 +144,13 @@ productController.deleteProduct = async (req, res) => {
     const productId = req.params.id;
 
     const product = await Product.findById(productId);
-    if (!product || product.isDeleted) {
+    if (!product) {
       return res
         .status(400)
         .json({ status: 'fail', message: '상품을 찾을 수 없습니다.' });
     }
 
-    // await Product.findByIdAndDelete(productId);
-    product.isDeleted = true;
+    await Product.findByIdAndDelete(productId);
     await product.save();
     res
       .status(200)
